@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XPL王者荣耀联赛</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+body{background:#0D0D0F;color:#fff;scroll-behavior: smooth;}
+.header{width:100%;height:70px;background:#1A1A1D;display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:99;position:relative;}
+.logo-wrap{display:flex;align-items:center;gap:12px;}
+.logo{height:42px}
+.logo-text{font-size:26px;font-weight:bold;color:#2478E0;letter-spacing:2px;}
+
+.nav a{color:#fff;text-decoration:none;margin:0 16px;font-size:15px;font-weight:500;padding-bottom:6px;cursor:pointer;}
+.nav a.active{color:#2478E0}
+.nav-underline {position:absolute;left:0;bottom:-2px;height:2px;background:#2478E0;transition: all 0.3s ease;}
+
+.banner{width:100%;height:200px;background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.7)),url(https://p.qqan.com/up/2021-1/16105149938654998.jpg) center no-repeat;background-size:cover;display:flex;align-items:center;justify-content:center}
+.banner-text{font-size:36px;font-weight:bold;color:#fff;text-shadow:0 0 10px #2478E0}
+.section{padding:30px 5%}
+.title{font-size:22px;margin-bottom:20px;border-left:4px solid #2478E0;padding-left:10px}
+.team-box{
+  display:flex;
+  gap:10px; /* 进一步缩小间距 */
+  width:100%;
+  overflow:hidden; /* 防止溢出 */
+}
+.team-card{
+  flex:1;
+  min-width:0; /* 允许卡片收缩 */
+  background:#1E1E23;
+  border-radius:10px;
+  overflow:hidden;
+  transition:0.3s;
+  cursor:pointer;
+}
+.team-logo{
+  height:80px; /* 再缩小图片高度 */
+  padding:8px;
+}
+.team-info{
+  padding:8px;
+}
+.team-name{
+  font-size:13px; /* 缩小战队名字体 */
+  white-space:nowrap; /* 防止文字换行 */
+  overflow:hidden;
+  text-overflow:ellipsis; /* 超长文字显示省略号 */
+}
+.team-desc{
+  font-size:11px; /* 缩小描述字体 */
+}
+.team-card:hover{transform:translateY(-6px);box-shadow:0 6px 16px rgba(36,120,224,0.25)}
+.team-logo{width:100%;height:140px;object-fit:contain;background:#25252B;padding:20px}
+.team-info{padding:15px}
+.team-name{font-size:18px;color:#2478E0;font-weight:bold;margin-bottom:6px}
+.team-desc{font-size:13px;color:#aaa}
+.schedule{background:#1E1E23;border-radius:10px;padding:20px;margin-bottom:30px}
+.schedule th{background:#2478E0;padding:12px;text-align:center}
+.schedule td{padding:14px;text-align:center;border-bottom:1px solid #333}
+.live{color:#2478E0;font-weight:bold;animation:flash 1s infinite;cursor:pointer;}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:0.5}}
+.rule{background:#1E1E23;padding:20px;border-radius:10px;line-height:1.8}
+.footer{background:#111;text-align:center;padding:20px;color:#777;font-size:13px;margin-top:20px}
+
+.section {scroll-margin-top: 80px;}
+
+/* 战队详情页样式（和你整体风格统一） */
+.team-detail {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0D0D0F;
+  z-index: 100;
+  padding: 80px 5% 30px;
+  overflow-y: auto;
+}
+.back-btn {
+  background: #2478E0;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 30px;
+  font-size: 15px;
+}
+.detail-header {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  margin-bottom: 40px;
+}
+.detail-logo {
+  width: 150px;
+  height: 150px;
+  background: #25252B;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.detail-basic h2 {
+  font-size: 32px;
+  color: #2478E0;
+  margin-bottom: 10px;
+}
+.slogan {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.region {
+  color: #aaa;
+}
+.grid-box {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.person-card {
+  background: #1E1E23;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+.person-avatar {
+  width: 50px;
+  height: 50px;
+  background: #25252B;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+}
+.person-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.person-pos {
+  font-size: 13px;
+  color: #aaa;
+}
+.honor-item {
+  background: #1E1E23;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  color: #ffd700;
+}
+/* 评分和积分榜样式 */
+.rating-table, .rank-table {
+  width: 100%;
+  background: #1E1E23;
+  border-radius: 10px;
+  border-collapse: collapse;
+}
+.rating-table th, .rank-table th {
+  background: #2478E0;
+  padding: 12px;
+  text-align: center;
+}
+.rating-table td, .rank-table td {
+  padding: 14px;
+  text-align: center;
+  border-bottom: 1px solid #333;
+}
+.rating-table tr:last-child td, .rank-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* 简化的评分赛程列表样式 */
+.score-schedule {
+  background: #1E1E23;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.score-schedule:hover {
+  background: #25252B;
+  box-shadow: 0 4px 12px rgba(36,120,224,0.2);
+}
+.score-schedule-title {
+  font-size: 18px;
+  color: #2478E0;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.score-schedule-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+}
+.score-schedule-teams {
+  display: flex;
+  gap: 20px;
+}
+
+/* 选手评分界面样式 */
+.score-detail {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0D0D0F;
+  z-index: 100;
+  padding: 80px 5% 30px;
+  overflow-y: auto;
+}
+.score-wrap{
+  display:grid;
+  gap:20px;
+  margin-top:20px;
+}
+.score-card{
+  background:#1e1e23;
+  padding:20px;
+  border-radius:12px;
+}
+.score-team{
+  color:#2478E0;
+  font-size:17px;
+  margin-bottom:12px;
+  font-weight:bold;
+}
+.score-player{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid #333;
+}
+.score-player:last-child{
+  border-bottom:none;
+}
+.player-name{
+  font-size:15px;
+}
+.stars{
+  display:flex;
+  gap:6px;
+}
+.stars span{
+  color:#777;
+  font-size:22px;
+  cursor:pointer;
+}
+.stars span.active,.stars span:hover{
+  color:#2478E0;
+}
+.avg-text{
+  margin-left:10px;
+  color:#2478E0;
+  font-size:14px;
+  min-width:40px;
+  text-align:right;
+}
+</style>
+</head>
+<body>
+
+<!-- 顶部导航（你原来的完全不变） -->
+<div class="header">
+  <div class="logo-wrap">
+    <img src="XPLLogo.jpg" class="logo" alt="XPL">
+    <span class="logo-text">XPL</span>
+  </div>
+  <div class="nav">
+    <a class="active" onclick="goTo('home')">首页</a>
+    <a onclick="goTo('schedule')">赛程</a>
+    <a onclick="goTo('team')">战队</a>
+    <a onclick="goTo('rule')">规则</a>
+    <a onclick="goTo('data')">评分</a> <!-- 改导航文字：数据→评分 -->
+    <a onclick="goTo('news')">积分榜</a> <!-- 改导航文字：新闻→积分榜 -->
+  </div>
+  <div class="nav-underline"></div>
+</div>
+
+<div id="home">
+  <div class="banner">
+    <div class="banner-text">XPL王者荣耀联赛 · 老熊杯</div>
+  </div>
+</div>
+
+<div id="schedule" class="section">
+  <div class="title">今日赛事</div>
+  <table class="schedule" width="100%">
+    <tr><th>时间</th><th>主队</th><th>比分</th><th>客队</th><th>状态</th></tr>
+    <tr><td>14:00</td><td>安徽超熊队</td><td>2 - 1</td><td>东北极熊队</td><td>已结束</td></tr>
+    <tr><td>19:00</td><td>西南6省</td><td>0 - 0</td><td>熊霸中原</td><td><a class="live" href="https://www.baidu.com" target="_blank">直播中</a></td></tr>
+  </table>
+</div>
+
+<div id="team" class="section">
+  <div class="title">热门战队</div>
+  <div class="team-box">
+    <div class="team-card" onclick="openTeam('team1')">
+      <img class="team-logo" src="https://p.qqan.com/up/2021-1/16105149938654998.jpg">
+      <div class="team-info"><div class="team-name">安徽超熊队</div><div class="team-desc">人气战队</div></div>
+    </div>
+    <div class="team-card" onclick="openTeam('team2')">
+      <img class="team-logo" src="https://p.qqan.com/up/2021-1/16105149938654998.jpg">
+      <div class="team-info"><div class="team-name">东北极熊队</div><div class="team-desc">顶级强队</div></div>
+    </div>
+    <div class="team-card" onclick="openTeam('team3')">
+      <img class="team-logo" src="https://p.qqan.com/up/2021-1/16105149938654998.jpg">
+      <div class="team-info"><div class="team-name">熊霸中原</div><div class="team-desc">强势打法</div></div>
+    </div>
+    <div class="team-card" onclick="openTeam('team4')">
+      <img class="team-logo" src="https://p.qqan.com/up/2021-1/16105149938654998.jpg">
+      <div class="team-info"><div class="team-name">包邮不包邮</div><div class="team-desc">新锐黑马</div></div>
+    </div>
+    <div class="team-card" onclick="openTeam('team5')">
+      <img class="team-logo" src="https://p.qqan.com/up/2021-1/16105149938654998.jpg">
+      <div class="team-info"><div class="team-name">华南F4</div><div class="team-desc">防守之王</div></div>
+    </div>
+    <div class="team-card" onclick="openTeam('team6')">
+      <img class="team-logo" src="https://p.qqan.com/up/2021-1/16105149938654998.jpg">
+      <div class="team-info"><div class="team-name">西南六省</div><div class="team-desc">进攻狂魔</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="team-detail" id="teamDetail">
+  <button class="back-btn" onclick="closeTeam()">← 返回战队列表</button>
+  <div class="detail-header">
+    <div class="detail-logo" id="dLogo">LOGO</div>
+    <div class="detail-basic">
+      <h2 id="dName">战队名</h2>
+      <div class="slogan" id="dSlogan">口号</div>
+      <div class="region" id="dRegion">地区</div>
+    </div>
+  </div>
+
+  <div class="title">首发成员</div>
+  <div class="grid-box" id="dStart"></div>
+
+  <div class="title">替补成员</div>
+  <div class="grid-box grid-3" id="dSub"></div>
+
+  <div class="title">赛训组</div>
+  <div class="grid-box grid-3" id="dStaff"></div>
+
+  <div class="title">战队荣誉</div>
+  <div class="grid-box grid-3" id="dHonor"></div>
+</div>
+
+<div id="rule" class="section">
+  <div class="title">赛事规则</div>
+  <div class="rule">
+    1. 常规赛采用BO1全局BP模式，胜者积1分，败者积0分。<br>
+    2. 季后赛采用BO3双败淘汰制，总决赛争夺总冠军。<br>
+    3. 每队首发5人，可替补2人，BP顺序红蓝方交替禁用选择。<br>
+    4. 违规、消极比赛将按联盟规定进行处罚。
+  </div>
+</div>
+
+<!-- ====================== 简化版评分板块（仅显示赛程） ====================== -->
+<div id="data" class="section">
+  <div class="title">比赛选手评分</div>
+  
+  <!-- 简化的赛程列表 -->
+  <div class="score-schedule" onclick="openScoreDetail('match1')">
+    <div class="score-schedule-title">14:00 安徽超熊队 vs 东北极熊队</div>
+    <div class="score-schedule-info">
+      <div class="score-schedule-teams">
+        <span>安徽超熊队 (2)</span>
+        <span>东北极熊队 (1)</span>
+      </div>
+      <span>点击为选手评分</span>
+    </div>
+  </div>
+
+  <div class="score-schedule" onclick="openScoreDetail('match2')">
+    <div class="score-schedule-title">19:00 西南六省 vs 熊霸中原</div>
+    <div class="score-schedule-info">
+      <div class="score-schedule-teams">
+        <span>西南六省 (0)</span>
+        <span>熊霸中原 (0)</span>
+      </div>
+      <span>点击为选手评分</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== 选手评分详情界面 ====================== -->
+<div class="score-detail" id="scoreDetail">
+  <button class="back-btn" onclick="closeScoreDetail()">← 返回评分列表</button>
+  <div class="title" id="scoreMatchTitle">14:00 安徽超熊队 vs 东北极熊队</div>
+  
+  <div class="score-wrap" id="scoreContent">
+    <!-- 评分内容通过JS动态生成 -->
+  </div>
+</div>
+
+<!-- 腾讯云开发 SDK -->
+<script src="https://imgcache.qq.com/qcloud/cloudbase-js-sdk/1.12.0/cloudbase.full.js"></script>
+
+<!-- 新闻板块改为【积分榜】板块 -->
+<div id="news" class="section">
+  <div class="title">联赛积分榜</div>
+  <table class="rank-table">
+    <tr><th>排名</th><th>战队</th><th>场次</th><th>胜场</th><th>负场</th><th>积分</th><th>净胜局</th></tr>
+    <tr><td>1</td><td>东北极熊队</td><td>10</td><td>9</td><td>1</td><td>9</td><td>+18</td></tr>
+    <tr><td>2</td><td>安徽超熊队</td><td>10</td><td>8</td><td>2</td><td>8</td><td>+15</td></tr>
+    <tr><td>3</td><td>西南六省</td><td>10</td><td>7</td><td>3</td><td>7</td><td>+10</td></tr>
+    <tr><td>4</td><td>熊霸中原</td><td>10</td><td>6</td><td>4</td><td>6</td><td>+5</td></tr>
+    <tr><td>5</td><td>华南F4</td><td>10</td><td>4</td><td>6</td><td>4</td><td>-2</td></tr>
+    <tr><td>6</td><td>包邮不包邮</td><td>10</td><td>2</td><td>8</td><td>2</td><td>-12</td></tr>
+  </table>
+</div>
+
+<div class="footer">
+  <div style="margin-bottom:15px;line-height:1.8;font-size:12px;color:#999;text-align:left;max-width:1200px;margin:0 auto;">
+    <p style="margin-bottom:8px;"><strong>免责声明：</strong></p>
+    <p>1. 本网站及XPL赛事为粉丝自发组织、非盈利性质的娱乐活动，与腾讯游戏、KPL职业联赛及任何官方机构无关。</p>
+    <p>2. 本站不收取任何费用、不设置现金奖金、不接受赞助与商业合作，仅用于爱好者交流使用。</p>
+    <p>3. 本站不使用任何未经授权的官方LOGO、赛事画面、选手肖像及版权内容，如有侵权请联系删除。</p>
+    <p>4. 本活动仅限成年用户自愿参与，严禁赌博、博彩及任何违法违规行为。</p>
+    <p>5. 网站代码开源仅作技术交流，不用于任何商业用途。</p>
+  </div>
+  <div style="color:#777;font-size:13px;">
+    XPL王者荣耀联赛官网 &copy; 2026 所有权利保留
+  </div>
+</div>
+
+<script>
+// ==========================================
+// 在这里 粘贴 你的腾讯云环境ID！！！
+// ==========================================
+const ENV_ID = "xpl2026-d6gb4nw6d1023b881";
+
+// 初始化云开发
+const app = cloudbase.init({ env: ENV_ID });
+const db = app.database();
+
+// 比赛数据配置
+const matchData = {
+  match1: {
+    title: "14:00 安徽超熊队 vs 东北极熊队",
+    teams: [
+      {
+        name: "安徽超熊队",
+        players: [
+          { pid: "ah01", name: "上单 - 小熊" },
+          { pid: "ah02", name: "打野 - 大熊" },
+          { pid: "ah03", name: "中单 - 熊宝" },
+          { pid: "ah04", name: "ADC - 熊熊" },
+          { pid: "ah05", name: "辅助 - 熊大" }
+        ]
+      },
+      {
+        name: "东北极熊队",
+        players: [
+          { pid: "db01", name: "上单 - 冰熊" },
+          { pid: "db02", name: "打野 - 雪熊" },
+          { pid: "db03", name: "中单 - 白熊" },
+          { pid: "db04", name: "ADC - 酷熊" },
+          { pid: "db05", name: "辅助 - 冷熊" }
+        ]
+      }
+    ]
+  },
+  match2: {
+    title: "19:00 西南六省 vs 熊霸中原",
+    teams: [
+      {
+        name: "西南六省",
+        players: [
+          { pid: "xn01", name: "上单 - 战熊" },
+          { pid: "xn02", name: "打野 - 狂熊" },
+          { pid: "xn03", name: "中单 - 烈熊" },
+          { pid: "xn04", name: "ADC - 傲熊" },
+          { pid: "xn05", name: "辅助 - 冰熊" }
+        ]
+      },
+      {
+        name: "熊霸中原",
+        players: [
+          { pid: "zy01", name: "上单 - 霸熊" },
+          { pid: "zy02", name: "打野 - 战熊" },
+          { pid: "zy03", name: "中单 - 猛熊" },
+          { pid: "zy04", name: "ADC - 狂熊" },
+          { pid: "zy05", name: "辅助 - 烈熊" }
+        ]
+      }
+    ]
+  }
+};
+
+// 加载选手评分数据
+async function loadPlayerScores(pid) {
+  try {
+    const res = await db.collection("player_scores").where({ pid }).get();
+    const scores = res.data.map(i => i.score);
+    const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : "0.0";
+    return avg;
+  } catch (e) {
+    console.error("加载评分失败:", e);
+    return "0.0";
+  }
+}
+
+// 打开评分详情界面
+async function openScoreDetail(matchId) {
+  const match = matchData[matchId];
+  document.getElementById("scoreMatchTitle").innerText = match.title;
+  const scoreContent = document.getElementById("scoreContent");
+  scoreContent.innerHTML = "";
+
+  // 生成两队评分卡片
+  for (const team of match.teams) {
+    const teamCard = document.createElement("div");
+    teamCard.className = "score-card";
+    teamCard.innerHTML = `<div class="score-team">${team.name}</div><div class="player-scores" data-team="${team.name}"></div>`;
+    
+    const playerScores = teamCard.querySelector(".player-scores");
+    // 生成每个选手的评分项
+    for (const player of team.players) {
+      const avg = await loadPlayerScores(player.pid);
+      const playerItem = document.createElement("div");
+      playerItem.className = "score-player";
+      playerItem.dataset.pid = player.pid;
+      playerItem.innerHTML = `
+        <span class="player-name">${player.name}</span>
+        <div class="stars">
+          <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+        </div>
+        <span class="avg-text">${avg}</span>
+      `;
+      playerScores.appendChild(playerItem);
+    }
+    
+    scoreContent.appendChild(teamCard);
+  }
+
+  // 绑定星星点击事件
+  bindStarClickEvents();
+  
+  // 显示评分详情界面
+  document.getElementById("scoreDetail").style.display = "block";
+}
+
+// 关闭评分详情界面
+function closeScoreDetail() {
+  document.getElementById("scoreDetail").style.display = "none";
+}
+
+// 绑定星星点击评分事件
+function bindStarClickEvents() {
+  document.querySelectorAll(".stars").forEach(s => {
+    const stars = s.querySelectorAll("span");
+    stars.forEach((star, i) => {
+      star.onclick = async () => {
+        const score = i + 1;
+        const player = s.closest(".score-player");
+        const pid = player.dataset.pid;
+        const team = s.closest(".player-scores").dataset.team;
+        
+        // 检查是否已投票
+        if (localStorage.getItem("voted_" + pid)) {
+          alert("你已经评过分啦！");
+          return;
+        }
+        
+        // 提交评分到数据库
+        try {
+          await db.collection("player_scores").add({ 
+            pid, 
+            team, 
+            score, 
+            time: new Date() 
+          });
+          localStorage.setItem("voted_" + pid, "1");
+          alert("评分成功！");
+          // 重新加载当前比赛的评分
+          const matchTitle = document.getElementById("scoreMatchTitle").innerText;
+          const matchId = Object.keys(matchData).find(key => matchData[key].title === matchTitle);
+          openScoreDetail(matchId);
+        } catch (e) {
+          console.error("提交评分失败:", e);
+          alert("评分失败，请稍后重试！");
+        }
+      }
+    });
+  });
+}
+
+// 你原来的导航功能
+const navItems = document.querySelectorAll('.nav a');
+const underline = document.querySelector('.nav-underline');
+function initUnderline() {
+  const active = document.querySelector('.nav a.active');
+  underline.style.left = active.offsetLeft + 'px';
+  underline.style.width = active.offsetWidth + 'px';
+}
+function goTo(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+  navItems.forEach(i => i.classList.remove('active'));
+  event.target.classList.add('active');
+  initUnderline();
+}
+window.addEventListener('load', initUnderline);
+window.addEventListener('resize', initUnderline);
+
+// 战队详情交互
+const teamData = {
+  team1:{name:"安徽超熊队",slogan:"皖地雄风，熊起江淮！",region:"安徽 · 人气战队",
+    start:["上单-小熊","打野-大熊","中单-熊宝","ADC-熊熊","辅助-熊大"],
+    sub:["替补上单-熊二","替补中单-熊三"],staff:["主教练-李教练","分析师-王哥"],
+    honor:["皖省联赛冠军","最受欢迎战队"]},
+  team2:{name:"东北极熊队",slogan:"极寒之地，熊霸四方！",region:"东北 · 顶级强队",
+    start:["上单-冰熊","打野-雪熊","中单-白熊","ADC-酷熊","辅助-冷熊"],
+    sub:["替补打野-霜熊"],staff:["主教练-张教练","战术指导-赵哥"],
+    honor:["东北联赛总冠军","年度最佳战队"]},
+  team3:{name:"熊霸中原",slogan:"逐鹿中原，唯熊独尊！",region:"中原 · 强势打法",
+    start:["上单-霸熊","打野-战熊","中单-猛熊","ADC-狂熊","辅助-烈熊"],
+    sub:["替补ADC-傲熊","替补辅助-战熊2"],staff:["主教练-刘教练","数据分析师-陈哥"],
+    honor:["中原赛区冠军","最强团战战队"]},
+  team4:{name:"雷霆战熊",slogan:"雷霆出击，所向披靡！",region:"华东 · 新锐黑马",
+    start:["上单-雷熊","打野-霆熊","中单-闪熊","ADC-电熊","辅助-光熊"],
+    sub:["替补中单-暴熊"],staff:["主教练-周教练"],honor:["新秀赛冠军","最快进步战队"]},
+  team5:{name:"雪域神熊",slogan:"雪域守护，坚不可摧！",region:"西北 · 防守之王",
+    start:["上单-圣熊","打野-灵熊","中单-玄熊","ADC-穹熊","辅助-荒熊"],
+    sub:["替补上单-帝熊"],staff:["主教练-吴教练"],honor:["最佳防守战队","西北赛区冠军"]},
+  team6:{name:"烈焰狂熊",slogan:"烈焰燎原，碾压一切！",region:"华南 · 进攻狂魔",
+    start:["上单-炎熊","打野-火熊","中单-焰熊","ADC-燎熊","辅助-原熊"],
+    sub:["替补打野-焚熊"],staff:["主教练-郑教练"],honor:["最强进攻战队","华南赛区冠军"]}
+};
+
+function openTeam(id){
+  const t = teamData[id];
+  document.getElementById("dName").innerText = t.name;
+  document.getElementById("dSlogan").innerText = t.slogan;
+  document.getElementById("dRegion").innerText = t.region;
+  document.getElementById("dLogo").innerText = t.name;
+
+  function render(list, domId){
+    let html = "";
+    list.forEach(item => { html += `<div class="person-card"><div class="person-avatar"></div><div class="person-name">${item.split('-')[0]}</div><div class="person-pos">${item.split('-')[1]}</div></div>`; });
+    document.getElementById(domId).innerHTML = html;
+  }
+  render(t.start, "dStart");
+  render(t.sub, "dSub");
+  render(t.staff, "dStaff");
+  
+  let hHtml = ""; t.honor.forEach(i=>{hHtml+=`<div class="honor-item">${i}</div>`;});
+  document.getElementById("dHonor").innerHTML = hHtml;
+
+  document.getElementById("teamDetail").style.display = "block";
+}
+function closeTeam(){
+  document.getElementById("teamDetail").style.display = "none";
+}
+</script>
+</body>
+</html>
